@@ -1,0 +1,327 @@
+{
+  "_comment": "LLM-generated synthetic CRM for Loopp. Dates are relative (…_days_ago) so policy/window scenarios stay valid whenever the DB is seeded. Each order's `scenario` documents the policy branch it exercises; order totals are computed from items at seed time.",
+  "customers": [
+    {
+      "name": "Ava Thompson",
+      "email": "ava.thompson@example.com",
+      "phone": "+1-415-555-0101",
+      "loyalty_tier": "gold",
+      "created_days_ago": 420,
+      "lifetime_value": 1840.25,
+      "orders": [
+        {
+          "order_number": "LP-1001",
+          "scenario": "approve_happy_path",
+          "status": "delivered",
+          "order_days_ago": 9,
+          "delivered_days_ago": 5,
+          "items": [
+            {"product_name": "Wireless Earbuds Pro", "sku": "ELEC-EB-PRO", "category": "electronics", "quantity": 1, "unit_price": 49.99, "is_final_sale": false, "is_returnable": true}
+          ]
+        },
+        {
+          "order_number": "LP-1016",
+          "scenario": "deny_window_expired_history",
+          "status": "delivered",
+          "order_days_ago": 50,
+          "delivered_days_ago": 45,
+          "items": [
+            {"product_name": "Organic Cotton Tee", "sku": "APP-TEE-01", "category": "apparel", "quantity": 1, "unit_price": 24.99, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Liam Patel",
+      "email": "liam.patel@example.com",
+      "phone": "+1-415-555-0102",
+      "loyalty_tier": "standard",
+      "created_days_ago": 200,
+      "lifetime_value": 612.40,
+      "orders": [
+        {
+          "order_number": "LP-1002",
+          "scenario": "deny_final_sale",
+          "status": "delivered",
+          "order_days_ago": 12,
+          "delivered_days_ago": 8,
+          "items": [
+            {"product_name": "Clearance Down Jacket", "sku": "APP-DJ-CLR", "category": "apparel", "quantity": 1, "unit_price": 129.00, "is_final_sale": true, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sophia Nguyen",
+      "email": "sophia.nguyen@example.com",
+      "phone": "+1-415-555-0103",
+      "loyalty_tier": "standard",
+      "created_days_ago": 95,
+      "lifetime_value": 1450.00,
+      "orders": [
+        {
+          "order_number": "LP-1003",
+          "scenario": "escalate_over_threshold",
+          "status": "delivered",
+          "order_days_ago": 10,
+          "delivered_days_ago": 6,
+          "items": [
+            {"product_name": "UltraBook 14\" Laptop", "sku": "ELEC-UB-14", "category": "electronics", "quantity": 1, "unit_price": 1299.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Noah Garcia",
+      "email": "noah.garcia@example.com",
+      "phone": "+1-415-555-0104",
+      "loyalty_tier": "standard",
+      "created_days_ago": 310,
+      "lifetime_value": 289.95,
+      "orders": [
+        {
+          "order_number": "LP-1004",
+          "scenario": "deny_window_expired",
+          "status": "delivered",
+          "order_days_ago": 66,
+          "delivered_days_ago": 60,
+          "items": [
+            {"product_name": "Trail Running Shoes", "sku": "FOOT-TR-09", "category": "footwear", "quantity": 1, "unit_price": 89.95, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Emma Wilson",
+      "email": "emma.wilson@example.com",
+      "phone": "+1-415-555-0105",
+      "loyalty_tier": "gold",
+      "created_days_ago": 510,
+      "lifetime_value": 2210.10,
+      "orders": [
+        {
+          "order_number": "LP-1005",
+          "scenario": "deny_non_returnable_gift_card",
+          "status": "delivered",
+          "order_days_ago": 6,
+          "delivered_days_ago": 3,
+          "items": [
+            {"product_name": "Loopp Gift Card $100", "sku": "GC-100", "category": "gift_cards", "quantity": 1, "unit_price": 100.00, "is_final_sale": false, "is_returnable": false}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Oliver Brown",
+      "email": "oliver.brown@example.com",
+      "phone": "+1-415-555-0106",
+      "loyalty_tier": "standard",
+      "created_days_ago": 140,
+      "lifetime_value": 530.00,
+      "orders": [
+        {
+          "order_number": "LP-1006",
+          "scenario": "deny_duplicate_refund",
+          "status": "delivered",
+          "order_days_ago": 16,
+          "delivered_days_ago": 12,
+          "pre_refunded": true,
+          "items": [
+            {"product_name": "Portable Bluetooth Speaker", "sku": "ELEC-BTS-22", "category": "electronics", "quantity": 1, "unit_price": 75.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Isabella Martinez",
+      "email": "isabella.martinez@example.com",
+      "phone": "+1-415-555-0107",
+      "loyalty_tier": "standard",
+      "created_days_ago": 60,
+      "lifetime_value": 122.30,
+      "orders": [
+        {
+          "order_number": "LP-1007",
+          "scenario": "deny_non_returnable_perishable",
+          "status": "delivered",
+          "order_days_ago": 5,
+          "delivered_days_ago": 2,
+          "items": [
+            {"product_name": "Artisan Coffee Beans 2kg", "sku": "GRO-CB-2K", "category": "grocery", "quantity": 1, "unit_price": 34.50, "is_final_sale": false, "is_returnable": false}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "James Anderson",
+      "email": "james.anderson@example.com",
+      "phone": "+1-415-555-0108",
+      "loyalty_tier": "vip",
+      "created_days_ago": 730,
+      "lifetime_value": 9820.75,
+      "orders": [
+        {
+          "order_number": "LP-1008",
+          "scenario": "escalate_vip_over_threshold",
+          "status": "delivered",
+          "order_days_ago": 8,
+          "delivered_days_ago": 4,
+          "items": [
+            {"product_name": "Prosumer Espresso Machine", "sku": "HOME-ESP-9", "category": "home", "quantity": 1, "unit_price": 899.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        },
+        {
+          "order_number": "LP-1017",
+          "scenario": "deny_non_returnable_gift_card_vip",
+          "status": "delivered",
+          "order_days_ago": 24,
+          "delivered_days_ago": 20,
+          "items": [
+            {"product_name": "Loopp Gift Card $50", "sku": "GC-050", "category": "gift_cards", "quantity": 1, "unit_price": 50.00, "is_final_sale": false, "is_returnable": false}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mia Davis",
+      "email": "mia.davis@example.com",
+      "phone": "+1-415-555-0109",
+      "loyalty_tier": "standard",
+      "created_days_ago": 180,
+      "lifetime_value": 410.50,
+      "orders": [
+        {
+          "order_number": "LP-1009",
+          "scenario": "mixed_order_item_level",
+          "status": "delivered",
+          "order_days_ago": 11,
+          "delivered_days_ago": 7,
+          "items": [
+            {"product_name": "Premium Yoga Mat", "sku": "FIT-YM-01", "category": "fitness", "quantity": 1, "unit_price": 39.99, "is_final_sale": false, "is_returnable": true},
+            {"product_name": "Clearance Resistance Bands", "sku": "FIT-RB-CLR", "category": "fitness", "quantity": 1, "unit_price": 19.99, "is_final_sale": true, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Benjamin Lee",
+      "email": "benjamin.lee@example.com",
+      "phone": "+1-415-555-0110",
+      "loyalty_tier": "standard",
+      "created_days_ago": 45,
+      "lifetime_value": 320.00,
+      "orders": [
+        {
+          "order_number": "LP-1010",
+          "scenario": "deny_not_delivered",
+          "status": "shipped",
+          "order_days_ago": 2,
+          "delivered_days_ago": null,
+          "items": [
+            {"product_name": "Adjustable Standing Desk", "sku": "HOME-SD-44", "category": "home", "quantity": 1, "unit_price": 320.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Charlotte Taylor",
+      "email": "charlotte.taylor@example.com",
+      "phone": "+1-415-555-0111",
+      "loyalty_tier": "gold",
+      "created_days_ago": 365,
+      "lifetime_value": 3050.00,
+      "orders": [
+        {
+          "order_number": "LP-1011",
+          "scenario": "approve_boundary_exactly_500",
+          "status": "delivered",
+          "order_days_ago": 14,
+          "delivered_days_ago": 10,
+          "items": [
+            {"product_name": "Designer Leather Handbag", "sku": "ACC-LH-500", "category": "accessories", "quantity": 1, "unit_price": 500.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lucas Moore",
+      "email": "lucas.moore@example.com",
+      "phone": "+1-415-555-0112",
+      "loyalty_tier": "standard",
+      "created_days_ago": 75,
+      "lifetime_value": 980.00,
+      "orders": [
+        {
+          "order_number": "LP-1012",
+          "scenario": "escalate_boundary_just_over_500",
+          "status": "delivered",
+          "order_days_ago": 13,
+          "delivered_days_ago": 9,
+          "items": [
+            {"product_name": "4K Action Camera", "sku": "ELEC-AC-4K", "category": "electronics", "quantity": 1, "unit_price": 529.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Amelia White",
+      "email": "amelia.white@example.com",
+      "phone": "+1-415-555-0113",
+      "loyalty_tier": "standard",
+      "created_days_ago": 30,
+      "lifetime_value": 59.98,
+      "orders": [
+        {
+          "order_number": "LP-1013",
+          "scenario": "approve_standard",
+          "status": "delivered",
+          "order_days_ago": 4,
+          "delivered_days_ago": 1,
+          "items": [
+            {"product_name": "Vitamin C Brightening Serum", "sku": "BEA-VCS-30", "category": "beauty", "quantity": 1, "unit_price": 29.99, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Henry Clark",
+      "email": "henry.clark@example.com",
+      "phone": "+1-415-555-0114",
+      "loyalty_tier": "gold",
+      "created_days_ago": 260,
+      "lifetime_value": 1190.00,
+      "orders": [
+        {
+          "order_number": "LP-1014",
+          "scenario": "approve_boundary_window_29_days",
+          "status": "delivered",
+          "order_days_ago": 33,
+          "delivered_days_ago": 29,
+          "items": [
+            {"product_name": "Mechanical Keyboard (Brown Switch)", "sku": "ELEC-MK-BR", "category": "electronics", "quantity": 1, "unit_price": 119.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Evelyn Hall",
+      "email": "evelyn.hall@example.com",
+      "phone": "+1-415-555-0115",
+      "loyalty_tier": "standard",
+      "created_days_ago": 110,
+      "lifetime_value": 199.00,
+      "orders": [
+        {
+          "order_number": "LP-1015",
+          "scenario": "deny_boundary_window_31_days",
+          "status": "delivered",
+          "order_days_ago": 35,
+          "delivered_days_ago": 31,
+          "items": [
+            {"product_name": "Noise-Cancelling Headphones", "sku": "ELEC-NC-77", "category": "electronics", "quantity": 1, "unit_price": 199.00, "is_final_sale": false, "is_returnable": true}
+          ]
+        }
+      ]
+    }
+  ]
+}

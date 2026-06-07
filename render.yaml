@@ -1,0 +1,26 @@
+# Render Blueprint — deploys the FastAPI backend as a free Docker web service.
+# (The Next.js frontend is deployed separately on Vercel; see DEPLOY.md.)
+#
+# In the Render dashboard → Blueprints → connect this repo. You'll be prompted for the
+# secret env vars marked `sync: false` (OPENAI_API_KEY, LANGSMITH_API_KEY).
+services:
+  - type: web
+    name: loopp-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: LANGSMITH_TRACING
+        value: "true"
+      - key: LANGSMITH_PROJECT
+        value: loopp-refund-agent
+      - key: AGENT_MODEL
+        value: gpt-4o

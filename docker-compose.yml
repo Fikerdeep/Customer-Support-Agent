@@ -1,0 +1,32 @@
+# Loopp refund agent — full stack.
+#   docker compose up --build
+# Backend → http://localhost:8000  ·  Frontend → http://localhost:3000
+#
+# Secrets (OPENAI_API_KEY, LANGSMITH_API_KEY, …) are read from the repo-root .env
+# and injected into the backend container; they are never baked into the image.
+
+services:
+  backend:
+    build: ./backend
+    env_file: ./.env
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "uv", "run", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BACKEND_URL: http://backend:8000
+    environment:
+      - BACKEND_URL=http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
