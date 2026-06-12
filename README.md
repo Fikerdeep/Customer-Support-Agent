@@ -270,9 +270,7 @@ workflow. `uv run python -m evals.runner --category adversarial`.
 - **Rate limiting** and abuse controls on `/api/chat`.
 - **Prompt-caching** of the system prompt + policy to cut token cost/latency, and an **eval suite** of
   injection prompts run in CI.
-- **Streaming** responses to the UI, idempotency keys on `submit_refund`, and an Alembic migration
-  path instead of `create_all`.
-- Human-in-the-loop queue for `escalated` refunds.
+- **Idempotency keys** on `submit_refund`, and an Alembic migration path instead of `create_all`.
 
 ---
 
@@ -304,5 +302,5 @@ frontend/
    still denied. Emphasize: enforced in code, not just the prompt.
 4. **Trace walkthrough (90s)** — open `/admin`, click the injection run: walk the tool I/O, the
    **red failed `submit_refund` step**, token cost, latency; explain how you'd debug from the trace.
-5. **Before prod (30s)** — auth, PII redaction, rate limiting, eval suite, streaming.
+5. **Before prod (30s)** — auth, PII redaction, rate limiting, eval suite.
 ```

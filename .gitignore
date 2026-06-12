@@ -234,3 +234,13 @@ backend/evals/results/
 
 # OS
 .DS_Store
+
+# --- Personal / local-only (kept out of the deliverable repo) ---
+# Backend walkthrough notebook — personal reference, not part of the submission
+backend/notebooks/
+# Generated architecture/flow visuals — personal reference
+docs/
+# Demo-recording scripts & demo-reset helper — personal
+LOOM_SCRIPT.md
+LOOM_DEMO_SCRIPT.md
+reset-demo.sh
