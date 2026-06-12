@@ -4,7 +4,7 @@
 
 An end-to-end, full-stack AI agent that **processes or denies e-commerce refunds**, holding a
 written refund policy as the source of truth even when customers plead, argue, or attempt prompt
-injection. Built for the Loopp "AI Agent" full-stack challenge.
+injection.
 
 - **Backend** — FastAPI + **LangGraph** state machine, **OpenAI gpt-4o** via tool calling, **SSE streaming**.
 - **Frontend** — Next.js + React SPA: a streaming customer **chat window** and an admin **trace + escalation dashboard**.
@@ -84,16 +84,6 @@ CORS or env wiring is needed for local dev.
 
 ---
 
-## Deploy (free)
-
-A live URL is an optional bonus for this challenge. The documented free path is **Vercel** (frontend) +
-**Render** (backend Docker) — see **[DEPLOY.md](DEPLOY.md)**, with a ready-made Render blueprint
-([`render.yaml`](render.yaml)). The Next.js `/api` proxy means the browser only talks to Vercel, so no
-CORS setup is needed. (Hosting is free; OpenAI tokens are billed to your key, and LangSmith has a free
-trace quota.)
-
----
-
 ## Architecture
 
 ```
@@ -170,7 +160,7 @@ writing, which is what makes the agent injection-resistant *by construction*.
 
 ## Resilience to adversarial users
 
-The challenge specifically tests prompt injection and policy-violation pressure. Three layers:
+The product specifically tests prompt injection and policy-violation pressure. Three layers:
 
 1. **Input guardrail** (`core/security.py`) — a heuristic detector flags likely injection / social
    engineering ("ignore previous instructions", "developer mode", authority/fake-policy claims) and
