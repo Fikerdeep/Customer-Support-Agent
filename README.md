@@ -283,14 +283,3 @@ frontend/
   components/   ChatWindow.tsx, RunsTable.tsx, TraceViewer.tsx
   lib/          api.ts
 ```
-
-## A 5-minute Loom outline
-
-1. **Setup (30s)** — `uv run uvicorn …` + `npm run dev`; show `/api/health`.
-2. **Happy path (60s)** — chat as Ava, refund LP-1001 → *approved*; note the empathetic reply.
-3. **Holding the line (90s)** — final-sale LP-1002 → *denied*; then the **prompt-injection** button →
-   still denied. Emphasize: enforced in code, not just the prompt.
-4. **Trace walkthrough (90s)** — open `/admin`, click the injection run: walk the tool I/O, the
-   **red failed `submit_refund` step**, token cost, latency; explain how you'd debug from the trace.
-5. **Before prod (30s)** — auth, PII redaction, rate limiting, eval suite.
-```
