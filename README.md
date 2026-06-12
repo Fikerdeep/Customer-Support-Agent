@@ -1,7 +1,5 @@
 # Loopp — AI Customer Support Refund Agent
 
-[![CI](https://github.com/Fikerdeep/Customer-Support-Agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Fikerdeep/Customer-Support-Agent/actions/workflows/ci.yml)
-
 An end-to-end, full-stack AI agent that **processes or denies e-commerce refunds**, holding a
 written refund policy as the source of truth even when customers plead, argue, or attempt prompt
 injection.
