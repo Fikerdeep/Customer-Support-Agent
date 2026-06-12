@@ -228,6 +228,9 @@ frontend/node_modules/
 frontend/.next/
 frontend/out/
 frontend/next-env.d.ts
+# The Python "lib/" rule above (build artifacts) also matches frontend/lib/,
+# which is real source (lib/api.ts). Keep it tracked.
+!frontend/lib/
 
 # Eval run artifacts
 backend/evals/results/
