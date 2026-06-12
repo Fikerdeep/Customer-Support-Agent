@@ -1,10 +1,16 @@
 """FastAPI application entrypoint."""
+
 from __future__ import annotations
 
+import logging
+import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api import admin, chat
 from app.core.config import get_settings
@@ -38,6 +44,46 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """Attach a request id to every request, expose it on the response, and log it."""
+    request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
+def _error_body(request: Request, message: str, type_: str) -> dict:
+    return {
+        "detail": message,
+        "error": {"type": type_, "message": message},
+        "request_id": getattr(request.state, "request_id", None),
+    }
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    body = _error_body(request, str(exc.detail), "http_error")
+    return JSONResponse(status_code=exc.status_code, content=body, headers=getattr(exc, "headers", None))
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    body = _error_body(request, "Invalid request.", "validation_error")
+    body["errors"] = exc.errors()
+    return JSONResponse(status_code=422, content=body)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    rid = getattr(request.state, "request_id", None)
+    logging.getLogger("loopp.api").exception("unhandled_error request_id=%s: %s", rid, exc)
+    body = _error_body(request, "Internal server error.", "internal_error")
+    return JSONResponse(status_code=500, content=body)
+
 
 app.include_router(chat.router)
 app.include_router(admin.router)

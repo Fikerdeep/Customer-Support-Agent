@@ -1,4 +1,5 @@
 """Pydantic request/response schemas for the API."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -24,3 +25,11 @@ class ChatResponse(BaseModel):
     run_id: int
     session_id: str
     summary: dict[str, Any]
+    request_id: str = ""
+    injection_flagged: bool = False
+    injection_tags: list[str] = Field(default_factory=list)
+
+
+class ResolveEscalationRequest(BaseModel):
+    action: str  # "approve" | "deny"
+    note: str = ""

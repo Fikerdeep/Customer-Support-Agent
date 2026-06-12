@@ -22,11 +22,33 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "httpx>=0.27",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "jupyterlab>=4.0",
+    "ipykernel>=6.29",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+# E501: long lines (prompts/docstrings); B008: FastAPI Depends() in defaults is intentional.
+ignore = ["E501", "B008"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["app"]
+ignore_missing_imports = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_redundant_casts = true
 
 [tool.uv]
 package = false

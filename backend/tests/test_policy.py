@@ -1,11 +1,12 @@
 """Unit tests for the deterministic policy engine (no DB, no LLM)."""
+
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.core.policy import Action, PolicyItem, PolicyOrder, evaluate_refund
 
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now(UTC)
 
 
 def item(price, *, final=False, returnable=True, qty=1, item_id=1, category="general"):
@@ -20,8 +21,14 @@ def order(items, *, delivered_days_ago=5, status="delivered", customer_id=1, ord
 
 def evaluate(o, *, auth=1, amount=None, already=False, item_id=None):
     return evaluate_refund(
-        o, auth_customer_id=auth, requested_amount=amount, already_refunded=already,
-        item_id=item_id, return_window_days=30, escalation_threshold=500.0, now=NOW,
+        o,
+        auth_customer_id=auth,
+        requested_amount=amount,
+        already_refunded=already,
+        item_id=item_id,
+        return_window_days=30,
+        escalation_threshold=500.0,
+        now=NOW,
     )
 
 

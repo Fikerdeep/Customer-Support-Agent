@@ -4,6 +4,7 @@ The repo-root ``.env`` defines ``openai_key``. We read that name explicitly (and
 fall back to the SDK's standard ``OPENAI_API_KEY``), then export the resolved key
 so both ``langchain-openai`` and the raw ``openai`` SDK pick it up.
 """
+
 from __future__ import annotations
 
 import os
@@ -14,7 +15,7 @@ from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]  # .../backend
-REPO_ROOT = BACKEND_DIR.parent                     # repo root (holds .env)
+REPO_ROOT = BACKEND_DIR.parent  # repo root (holds .env)
 DATA_DIR = BACKEND_DIR / "app" / "data"
 LOG_DIR = BACKEND_DIR / "logs"
 

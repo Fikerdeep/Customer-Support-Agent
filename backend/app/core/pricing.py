@@ -5,6 +5,7 @@ for cached input tokens; OpenAI does not charge a separate cache-write fee, so
 ``cache_write`` is 0. Edit/extend this table for whatever model you set in
 ``AGENT_MODEL`` — unknown models fall back to the gpt-4o rate.
 """
+
 from __future__ import annotations
 
 PRICING_PER_MILLION: dict[str, dict[str, float]] = {

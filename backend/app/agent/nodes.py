@@ -3,11 +3,13 @@
 Both nodes record structured trace events (tokens, cost, latency, tool I/O, retries)
 into the run's Tracer so the admin dashboard and Loom walkthrough can replay the run.
 """
+
 from __future__ import annotations
 
 import json
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_openai import ChatOpenAI

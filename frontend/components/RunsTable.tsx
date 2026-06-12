@@ -54,7 +54,14 @@ export default function RunsTable({
             <td>
               <span className={decisionClass(r.decision)}>{r.decision}</span>
             </td>
-            <td>{shorten(r.user_message)}</td>
+            <td>
+              {shorten(r.user_message)}
+              {r.injection_flagged && (
+                <span className="flag bad" title={(r.injection_tags ?? []).join(", ")}>
+                  ⚠ injection
+                </span>
+              )}
+            </td>
             <td>{r.num_llm_turns}</td>
             <td>{r.num_tool_calls}</td>
             <td style={{ color: r.num_retries > 0 ? "var(--red)" : undefined }}>{r.num_retries}</td>

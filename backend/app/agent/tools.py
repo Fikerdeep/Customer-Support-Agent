@@ -6,9 +6,10 @@ server rather than supplied by the model. ``check_refund_eligibility`` and ``sub
 both route through the deterministic policy engine; ``submit_refund`` re-validates before
 writing, so policy is enforced in code regardless of the model's intent.
 """
+
 from __future__ import annotations
 
-from langchain_core.tools import StructuredTool, tool
+from langchain_core.tools import BaseTool, tool
 
 from app.agent.context import RunContext
 from app.agent.prompts import load_policy_text
@@ -38,7 +39,7 @@ def _to_policy_order(order: Order) -> PolicyOrder:
     )
 
 
-def build_tools(ctx: RunContext) -> list[StructuredTool]:
+def build_tools(ctx: RunContext) -> list[BaseTool]:
     db = ctx.db
     auth_id = ctx.auth_customer_id
 

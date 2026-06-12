@@ -1,14 +1,15 @@
 """SQLAlchemy ORM models for the mock CRM + decision/audit tables."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Base(DeclarativeBase):
@@ -26,7 +27,7 @@ class Customer(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     lifetime_value: Mapped[float] = mapped_column(Float, default=0.0)
 
-    orders: Mapped[list["Order"]] = relationship(back_populates="customer", cascade="all, delete-orphan")
+    orders: Mapped[list[Order]] = relationship(back_populates="customer", cascade="all, delete-orphan")
 
 
 class Order(Base):
@@ -37,13 +38,15 @@ class Order(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
     order_date: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="processing")  # processing|shipped|delivered|cancelled
+    status: Mapped[str] = mapped_column(
+        String(20), default="processing"
+    )  # processing|shipped|delivered|cancelled
     total_amount: Mapped[float] = mapped_column(Float, default=0.0)
     currency: Mapped[str] = mapped_column(String(8), default="USD")
 
-    customer: Mapped["Customer"] = relationship(back_populates="orders")
-    items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
-    refunds: Mapped[list["Refund"]] = relationship(back_populates="order", cascade="all, delete-orphan")
+    customer: Mapped[Customer] = relationship(back_populates="orders")
+    items: Mapped[list[OrderItem]] = relationship(back_populates="order", cascade="all, delete-orphan")
+    refunds: Mapped[list[Refund]] = relationship(back_populates="order", cascade="all, delete-orphan")
 
 
 class OrderItem(Base):
@@ -59,7 +62,7 @@ class OrderItem(Base):
     is_final_sale: Mapped[bool] = mapped_column(Boolean, default=False)
     is_returnable: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    order: Mapped["Order"] = relationship(back_populates="items")
+    order: Mapped[Order] = relationship(back_populates="items")
 
 
 class Refund(Base):
@@ -74,8 +77,11 @@ class Refund(Base):
     decided_by: Mapped[str] = mapped_column(String(20), default="agent")  # agent|human
     policy_rule_applied: Mapped[str] = mapped_column(String(40), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    # Human-in-the-loop resolution of escalated refunds.
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    resolution_note: Mapped[str] = mapped_column(Text, default="")
 
-    order: Mapped["Order"] = relationship(back_populates="refunds")
+    order: Mapped[Order] = relationship(back_populates="refunds")
 
 
 class AgentRun(Base):
@@ -86,6 +92,9 @@ class AgentRun(Base):
     customer_id: Mapped[int | None] = mapped_column(ForeignKey("customers.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
     decision: Mapped[str] = mapped_column(String(20), default="pending")
+    request_id: Mapped[str] = mapped_column(String(64), default="")
+    injection_flagged: Mapped[bool] = mapped_column(Boolean, default=False)
+    injection_tags: Mapped[str] = mapped_column(String(256), default="")
     user_message: Mapped[str] = mapped_column(Text, default="")
     final_reply: Mapped[str] = mapped_column(Text, default="")
     total_input_tokens: Mapped[int] = mapped_column(Integer, default=0)
@@ -96,3 +105,14 @@ class AgentRun(Base):
     num_tool_calls: Mapped[int] = mapped_column(Integer, default=0)
     num_retries: Mapped[int] = mapped_column(Integer, default=0)
     trace_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class IdempotencyKey(Base):
+    """Caches a chat response per client-supplied Idempotency-Key so retries don't
+    re-run the agent (or risk a second refund)."""
+
+    __tablename__ = "idempotency_keys"
+
+    key: Mapped[str] = mapped_column(String(128), primary_key=True)
+    response_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

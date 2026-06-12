@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ChatWindow, { ChatMsg } from "@/components/ChatWindow";
-import { Customer, Order, getCustomers, getOrders, sendChat } from "@/lib/api";
+import { Customer, Order, TOOL_LABELS, getCustomers, getOrders, streamChat } from "@/lib/api";
 
 interface Scenario {
   label: string;
@@ -46,6 +46,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [toolStatus, setToolStatus] = useState<string | null>(null);
 
   useEffect(() => {
     getCustomers()
@@ -73,26 +74,45 @@ export default function ChatPage() {
 
   async function runTurn(email: string, text: string, history: ChatMsg[], sid: string | null) {
     setLoading(true);
-    try {
-      const resp = await sendChat({
+    setToolStatus(null);
+    // Placeholder assistant bubble that fills as tokens stream in.
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    let acc = "";
+
+    const patchLastAssistant = (patch: Partial<ChatMsg>) =>
+      setMessages((prev) => {
+        const i = prev.length - 1;
+        if (i < 0 || prev[i].role !== "assistant") return prev;
+        const copy = prev.slice();
+        copy[i] = { ...copy[i], ...patch };
+        return copy;
+      });
+
+    await streamChat(
+      {
         customer_email: email,
         message: text,
         history: history
           .filter((m) => m.role !== "error")
           .map((m) => ({ role: m.role, content: m.content })),
         session_id: sid,
-      });
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: resp.reply, decision: resp.decision },
-      ]);
-      setSessionId(resp.session_id);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setMessages((prev) => [...prev, { role: "error", content: `Error: ${msg}` }]);
-    } finally {
-      setLoading(false);
-    }
+      },
+      {
+        onToken: (t) => {
+          acc += t;
+          setToolStatus(null);
+          patchLastAssistant({ content: acc });
+        },
+        onToolStart: (d) => setToolStatus(TOOL_LABELS[d.name] ?? `Running ${d.name}…`),
+        onDone: (d) => {
+          setSessionId(d.session_id);
+          patchLastAssistant({ content: acc || "Done.", decision: d.decision });
+        },
+        onError: (m) => patchLastAssistant({ role: "error", content: `Error: ${m}` }),
+      },
+    );
+    setToolStatus(null);
+    setLoading(false);
   }
 
   function handleSend(text: string) {
@@ -185,6 +205,7 @@ export default function ChatPage() {
           messages={messages}
           loading={loading}
           disabled={!selectedEmail}
+          status={toolStatus}
           onSend={handleSend}
         />
       </div>

@@ -15,14 +15,15 @@ Rules (mirrors ``app/data/refund_policy.md``), evaluated in order:
   7. Amount        — the request cannot exceed the refundable amount.
   8. Threshold     — otherwise-eligible refunds over ``escalation_threshold`` go to a human.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from enum import Enum
+from datetime import UTC, datetime, timedelta
+from enum import StrEnum
 
 
-class Action(str, Enum):
+class Action(StrEnum):
     APPROVE = "approve"
     DENY = "deny"
     ESCALATE = "escalate"
@@ -70,7 +71,7 @@ class PolicyDecision:
 
 
 def _aware(dt: datetime) -> datetime:
-    return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+    return dt if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
 
 
 def evaluate_refund(
@@ -85,7 +86,7 @@ def evaluate_refund(
     now: datetime | None = None,
 ) -> PolicyDecision:
     """Evaluate a refund request and return the binding decision."""
-    now = _aware(now or datetime.now(timezone.utc))
+    now = _aware(now or datetime.now(UTC))
 
     # 1. Identity — must own the order.
     if order.customer_id != auth_customer_id:
@@ -155,9 +156,7 @@ def evaluate_refund(
 
     # 7. Amount sanity.
     refundable = (
-        round(sum(i.subtotal for i in targets), 2)
-        if item_id is not None
-        else round(order.total_amount, 2)
+        round(sum(i.subtotal for i in targets), 2) if item_id is not None else round(order.total_amount, 2)
     )
     amount = requested_amount if requested_amount and requested_amount > 0 else refundable
     if amount > refundable + 0.001:

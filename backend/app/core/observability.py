@@ -4,6 +4,7 @@ One :class:`Tracer` is created per ``/api/chat`` run and threaded through the
 agent. It produces the structured trace the admin dashboard renders and the Loom
 walkthrough narrates.
 """
+
 from __future__ import annotations
 
 import json
@@ -78,7 +79,9 @@ class Tracer:
         self.events.append(event)
         logger.info(
             "llm_turn",
-            extra={"trace": {k: event[k] for k in ("input_tokens", "output_tokens", "latency_ms", "cost_usd")}},
+            extra={
+                "trace": {k: event[k] for k in ("input_tokens", "output_tokens", "latency_ms", "cost_usd")}
+            },
         )
 
     # -- Tool calls --------------------------------------------------------

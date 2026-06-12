@@ -1,0 +1,30 @@
+# Conda environment for running the backend + the walkthrough notebook.
+#   conda env create -f environment.yml      # creates the 'loopp' env
+#   conda activate loopp
+#   python -m ipykernel install --user --name loopp --display-name "Python (loopp)"
+#
+# The app code itself is imported from backend/ (the notebook's setup cell adds it to
+# sys.path) — these are just the dependencies. The canonical install is still `uv sync`
+# in backend/; this file is a convenience for conda/Jupyter users.
+name: loopp
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - fastapi>=0.115
+      - uvicorn[standard]>=0.32
+      - langgraph>=0.2.50
+      - langchain-openai>=0.2.0
+      - langchain-core>=0.3.0
+      - langsmith>=0.1.0
+      - openai>=1.50
+      - sqlalchemy>=2.0
+      - pydantic>=2.9
+      - pydantic-settings>=2.6
+      - python-dotenv>=1.0
+      - httpx>=0.27
+      - pytest>=8.3
+      - ipykernel>=6.29
+      - jupyterlab>=4.0

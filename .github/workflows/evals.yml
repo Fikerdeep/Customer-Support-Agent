@@ -1,0 +1,41 @@
+name: Agent evals (live)
+
+# Manual trigger only — this hits the live model and costs OpenAI tokens.
+# Requires repo secret OPENAI_API_KEY. The runner exits non-zero on any policy
+# violation, so this job gates on agent resilience.
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: "Scenario category filter (blank = full suite)"
+        required: false
+        default: ""
+
+jobs:
+  evals:
+    name: refund-agent eval suite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync
+      - name: Run evals
+        run: |
+          if [ -n "${{ inputs.category }}" ]; then
+            uv run python -m evals.runner --category "${{ inputs.category }}"
+          else
+            uv run python -m evals.runner
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: backend/evals/results/latest.json

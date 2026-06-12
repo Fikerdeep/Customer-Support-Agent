@@ -13,11 +13,13 @@ export default function ChatWindow({
   messages,
   loading,
   disabled,
+  status,
   onSend,
 }: {
   messages: ChatMsg[];
   loading: boolean;
   disabled: boolean;
+  status?: string | null;
   onSend: (text: string) => void;
 }) {
   const [input, setInput] = useState("");
@@ -26,6 +28,9 @@ export default function ChatWindow({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  const last = messages[messages.length - 1];
+  const lastAssistantHasContent = Boolean(last && last.role === "assistant" && last.content);
 
   const submit = () => {
     const t = input.trim();
@@ -42,17 +47,22 @@ export default function ChatWindow({
             Pick a customer, then ask for a refund — or click a scenario on the left.
           </div>
         )}
-        {messages.map((m, i) => (
-          <div key={i} className={`msg ${m.role}`}>
-            {m.role === "assistant" && m.decision && (
-              <div style={{ marginBottom: 6 }}>
-                <span className={decisionClass(m.decision)}>{m.decision}</span>
-              </div>
-            )}
-            {m.content}
-          </div>
-        ))}
-        {loading && <div className="msg assistant spinner">Assist is thinking…</div>}
+        {messages.map((m, i) =>
+          // Hide the empty assistant placeholder until tokens start streaming in.
+          !m.content && m.role === "assistant" ? null : (
+            <div key={i} className={`msg ${m.role}`}>
+              {m.role === "assistant" && m.decision && (
+                <div style={{ marginBottom: 6 }}>
+                  <span className={decisionClass(m.decision)}>{m.decision}</span>
+                </div>
+              )}
+              {m.content}
+            </div>
+          ),
+        )}
+        {loading && !lastAssistantHasContent && (
+          <div className="msg assistant spinner">{status ?? "Assist is thinking…"}</div>
+        )}
         <div ref={endRef} />
       </div>
       <div className="composer">

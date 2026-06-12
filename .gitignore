@@ -229,5 +229,8 @@ frontend/.next/
 frontend/out/
 frontend/next-env.d.ts
 
+# Eval run artifacts
+backend/evals/results/
+
 # OS
 .DS_Store

@@ -1,14 +1,18 @@
-"""Admin/dashboard data endpoints: customers, their orders, and agent run traces."""
+"""Admin/dashboard data endpoints: customers, orders, run traces, and the
+human-in-the-loop escalation queue."""
+
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.api.schemas import ResolveEscalationRequest
 from app.db.database import get_db
-from app.db.models import AgentRun, Customer, Order
+from app.db.models import AgentRun, Customer, Order, Refund
 
 router = APIRouter(prefix="/api", tags=["admin"])
 
@@ -72,9 +76,11 @@ def list_runs(limit: int = 50, db: Session = Depends(get_db)) -> list[dict]:
             "id": r.id,
             "session_id": r.session_id,
             "customer_id": r.customer_id,
-            "customer_name": names.get(r.customer_id),
+            "customer_name": names.get(r.customer_id) if r.customer_id is not None else None,
             "created_at": r.created_at.isoformat() if r.created_at else None,
             "decision": r.decision,
+            "injection_flagged": r.injection_flagged,
+            "injection_tags": r.injection_tags.split(",") if r.injection_tags else [],
             "user_message": r.user_message,
             "final_reply": r.final_reply,
             "total_input_tokens": r.total_input_tokens,
@@ -115,14 +121,76 @@ def get_run(run_id: int, db: Session = Depends(get_db)) -> dict:
 @router.get("/stats")
 def stats(db: Session = Depends(get_db)) -> dict:
     total_runs = db.query(func.count(AgentRun.id)).scalar() or 0
-    by_decision = dict(
-        db.query(AgentRun.decision, func.count(AgentRun.id)).group_by(AgentRun.decision).all()
-    )
+    decision_rows = db.query(AgentRun.decision, func.count(AgentRun.id)).group_by(AgentRun.decision).all()
+    by_decision: dict[str, int] = {row[0]: row[1] for row in decision_rows}
     total_cost = db.query(func.coalesce(func.sum(AgentRun.total_cost_usd), 0.0)).scalar() or 0.0
+    injection_attempts = (
+        db.query(func.count(AgentRun.id)).filter(AgentRun.injection_flagged.is_(True)).scalar() or 0
+    )
+    pending_escalations = (
+        db.query(func.count(Refund.id))
+        .filter(Refund.status == "escalated", Refund.resolved_at.is_(None))
+        .scalar()
+        or 0
+    )
     return {
         "total_runs": total_runs,
         "by_decision": by_decision,
         "total_cost_usd": round(float(total_cost), 6),
         "customers": db.query(func.count(Customer.id)).scalar() or 0,
         "orders": db.query(func.count(Order.id)).scalar() or 0,
+        "injection_attempts": injection_attempts,
+        "pending_escalations": pending_escalations,
+    }
+
+
+@router.get("/escalations")
+def list_escalations(db: Session = Depends(get_db)) -> list[dict]:
+    """Refunds the agent escalated that still await a human decision."""
+    rows = (
+        db.query(Refund)
+        .filter(Refund.status == "escalated", Refund.resolved_at.is_(None))
+        .order_by(Refund.created_at.desc())
+        .all()
+    )
+    out = []
+    for r in rows:
+        out.append(
+            {
+                "refund_id": r.id,
+                "order_number": r.order.order_number if r.order else None,
+                "customer_name": r.order.customer.name if r.order and r.order.customer else None,
+                "amount": r.amount,
+                "reason": r.reason,
+                "policy_rule_applied": r.policy_rule_applied,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+        )
+    return out
+
+
+@router.post("/escalations/{refund_id}/resolve")
+def resolve_escalation(refund_id: int, body: ResolveEscalationRequest, db: Session = Depends(get_db)) -> dict:
+    """Human reviewer approves or denies an escalated refund."""
+    refund = db.get(Refund, refund_id)
+    if not refund:
+        raise HTTPException(status_code=404, detail="Refund not found")
+    if refund.status != "escalated" or refund.resolved_at is not None:
+        raise HTTPException(status_code=409, detail="This refund is not awaiting human review.")
+    action = body.action.strip().lower()
+    if action not in {"approve", "deny"}:
+        raise HTTPException(status_code=400, detail="action must be 'approve' or 'deny'")
+
+    refund.status = "approved" if action == "approve" else "denied"
+    refund.decided_by = "human"
+    refund.resolved_at = datetime.now(UTC)
+    refund.resolution_note = body.note
+    db.commit()
+    db.refresh(refund)
+    return {
+        "refund_id": refund.id,
+        "status": refund.status,
+        "decided_by": refund.decided_by,
+        "resolved_at": refund.resolved_at.isoformat() if refund.resolved_at else None,
+        "resolution_note": refund.resolution_note,
     }

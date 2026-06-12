@@ -1,8 +1,9 @@
 """Assemble the refund agent's LangGraph state machine.
 
-    START → agent ──(tool calls?)──▶ tools ──▶ agent  (loop)
-                   └──(final answer)──────────▶ END
+START → agent ──(tool calls?)──▶ tools ──▶ agent  (loop)
+               └──(final answer)──────────▶ END
 """
+
 from __future__ import annotations
 
 from langgraph.graph import END, StateGraph
@@ -25,8 +26,8 @@ def build_agent(ctx: RunContext):
     llm_with_tools = build_llm(ctx).bind_tools(tools)
 
     graph = StateGraph(AgentState)
-    graph.add_node("agent", make_agent_node(ctx, llm_with_tools))
-    graph.add_node("tools", make_tool_node(ctx, tools_by_name))
+    graph.add_node("agent", make_agent_node(ctx, llm_with_tools))  # type: ignore[call-overload]
+    graph.add_node("tools", make_tool_node(ctx, tools_by_name))  # type: ignore[call-overload]
     graph.set_entry_point("agent")
     graph.add_conditional_edges(
         "agent",

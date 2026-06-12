@@ -3,6 +3,7 @@
 Carries the DB session, the *authenticated* customer id (injected by the server,
 never supplied by the model), settings, the tracer, and the resolved decision.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

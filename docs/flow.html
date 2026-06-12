@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loopp Refund Agent — animated request flow</title>
+<style>
+  :root{--bg:#f5f7fb;--panel:#fff;--panel2:#eef1f7;--border:#dfe3ec;--text:#1b2230;
+        --muted:#5b6678;--accent:#4f6cff;--green:#168a4c;--red:#cf3a3f;
+        --mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 20px 36px}
+  h1{font-size:20px;margin:6px 0 2px}
+  h1 span{color:var(--accent)}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:8px 14px;
+    font-weight:600;cursor:pointer;font-size:13px}
+  button.ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+  button:hover{filter:brightness(1.04)}
+  select{background:#fff;border:1px solid var(--border);border-radius:9px;padding:7px 10px;color:var(--text);font-size:13px}
+  .hint{color:var(--muted);font-size:12px}
+  .stage{background:#fff;border:1px solid var(--border);border-radius:14px;padding:8px;overflow:hidden}
+  svg{width:100%;height:auto;display:block;cursor:pointer}
+  .caption{display:flex;gap:12px;align-items:flex-start;margin-top:12px;
+    background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+  .step{flex:0 0 92px;color:var(--accent);font-weight:700;font-size:12px}
+  .captxt{font-size:14px;line-height:1.5}
+  .bar{height:6px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar > i{display:block;height:100%;width:0;background:var(--accent);transition:width .08s linear}
+  /* svg element styles */
+  .node rect{fill:#fff;stroke:var(--border);stroke-width:1.5;transition:fill .2s,stroke .2s}
+  .node.on rect{fill:#eef2ff;stroke:var(--accent);stroke-width:3}
+  .node .t{font:700 13px ui-sans-serif,system-ui,Arial;fill:var(--text)}
+  .node .s{font:11px ui-sans-serif,system-ui,Arial;fill:var(--muted)}
+  .panel rect{fill:#fbfcfe;stroke:var(--border);stroke-width:1.5}
+  .panel .lbl{font:700 11px ui-sans-serif,system-ui,Arial;fill:var(--muted);letter-spacing:.4px}
+  .chip rect{fill:#fff;stroke:var(--border);stroke-width:1.2;transition:fill .2s,stroke .2s}
+  .chip.used rect{stroke:#9fd6b5}
+  .chip.on rect{fill:#eef2ff;stroke:var(--accent);stroke-width:2.4}
+  .chip text{font:11px var(--mono);fill:#33405c}
+  .chip.on text{fill:#1b2230;font-weight:700}
+  .edge{fill:none;stroke:#cdd5e4;stroke-width:1.6}
+  .edge.ret{stroke-dasharray:4 4}
+  #dotGlow{fill:var(--accent);opacity:.18}
+  #dot{fill:var(--accent)}
+  .badge{font:700 13px ui-sans-serif,system-ui,Arial}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Loopp Refund Agent — <span>animated request flow</span></h1>
+  <p class="sub">One refund request travelling through the whole architecture — every middleware, every tool call, the policy engine, and back. Click the diagram (or use the button) to pause.</p>
+
+  <div class="controls">
+    <button id="play">⏸ Pause</button>
+    <button id="restart" class="ghost">↻ Restart</button>
+    <label class="hint">Speed
+      <select id="speed">
+        <option value="1.6">Slow</option>
+        <option value="1.1" selected>Normal</option>
+        <option value="0.7">Fast</option>
+      </select>
+    </label>
+    <span class="hint">tip: click the diagram to pause / resume</span>
+  </div>
+
+  <div class="stage">
+    <svg id="svg" viewBox="0 0 1040 600" role="img" aria-label="Request flow diagram">
+      <!-- edges -->
+      <path class="edge" d="M140,136 V176"/>
+      <path class="edge" d="M140,252 V290"/>
+      <path class="edge" d="M236,312 L360,250"/>
+      <path class="edge" d="M600,250 L660,180"/>
+      <path class="edge" d="M830,303 V352"/>
+      <path class="edge" d="M660,384 L600,486"/>
+      <path class="edge" d="M360,500 H236"/>
+      <path class="edge ret" d="M44,500 H22 V104 H44"/>
+
+      <!-- left column -->
+      <g class="node" id="n-browser"><rect x="44" y="72" width="192" height="64" rx="11"/>
+        <text class="t" x="60" y="100">Browser</text><text class="s" x="60" y="120">streaming chat window</text></g>
+      <g class="node" id="n-api"><rect x="44" y="176" width="192" height="76" rx="11"/>
+        <text class="t" x="60" y="202">FastAPI middleware</text><text class="s" x="60" y="222">request-id · idempotency</text><text class="s" x="60" y="238">· rate-limit</text></g>
+      <g class="node" id="n-guard"><rect x="44" y="290" width="192" height="52" rx="11"/>
+        <text class="t" x="60" y="312">Injection guardrail</text><text class="s" x="60" y="330">core/security.py</text></g>
+
+      <!-- agent -->
+      <g class="node" id="n-agent"><rect x="360" y="206" width="240" height="92" rx="12"/>
+        <text class="t" x="380" y="236">LangGraph agent</text><text class="s" x="380" y="256">OpenAI gpt-4o · tool calling</text><text class="s" x="380" y="280">reasons over the policy →</text></g>
+
+      <!-- tools panel -->
+      <g class="panel"><rect x="660" y="70" width="340" height="250" rx="12"/>
+        <text class="lbl" x="676" y="62" style="fill:var(--muted)">TOOLS — the agent's only hands</text></g>
+      <g class="chip" id="c-account"><rect x="672" y="92" width="316" height="25" rx="7"/><text x="684" y="109">get_account_summary()</text></g>
+      <g class="chip" id="c-orders"><rect x="672" y="123" width="316" height="25" rx="7"/><text x="684" y="140">get_orders()</text></g>
+      <g class="chip" id="c-details"><rect x="672" y="154" width="316" height="25" rx="7"/><text x="684" y="171">get_order_details(order_number)</text></g>
+      <g class="chip" id="c-policy"><rect x="672" y="185" width="316" height="25" rx="7"/><text x="684" y="202">get_refund_policy()</text></g>
+      <g class="chip" id="c-elig"><rect x="672" y="216" width="316" height="25" rx="7"/><text x="684" y="233">check_refund_eligibility(...)</text></g>
+      <g class="chip" id="c-submit"><rect x="672" y="247" width="316" height="25" rx="7"/><text x="684" y="264">submit_refund(...)  ← binding write</text></g>
+      <g class="chip" id="c-escal"><rect x="672" y="278" width="316" height="25" rx="7"/><text x="684" y="295">escalate_to_human(...)</text></g>
+
+      <!-- policy / db / response -->
+      <g class="node" id="n-policy"><rect x="660" y="352" width="340" height="64" rx="12"/>
+        <text class="t" x="676" y="380">Policy engine — deterministic</text><text class="s" x="676" y="400">core/policy.py · the source of truth</text></g>
+      <g class="node" id="n-db"><rect x="360" y="468" width="240" height="64" rx="12"/>
+        <text class="t" x="380" y="496">Database (SQLite)</text><text class="s" x="380" y="516">refunds + agent_runs (trace)</text></g>
+      <g class="node" id="n-response"><rect x="44" y="468" width="192" height="64" rx="12"/>
+        <text class="t" x="60" y="496">Response</text><text class="s" x="60" y="516">SSE → browser</text></g>
+
+      <!-- decision badge (hidden until end) -->
+      <g id="decision" style="opacity:0"><rect x="60" y="430" width="170" height="30" rx="8" fill="#e7f6ee" stroke="#2fbf71" stroke-width="2"/>
+        <text class="badge" x="78" y="450" fill="#168a4c">APPROVED · $49.99</text></g>
+
+      <!-- moving pulse -->
+      <circle id="dotGlow" cx="140" cy="104" r="13"/>
+      <circle id="dot" cx="140" cy="104" r="6"/>
+    </svg>
+  </div>
+
+  <div class="caption">
+    <div class="step" id="stepLbl">STEP 1 / 14</div>
+    <div class="captxt" id="capTxt">…</div>
+  </div>
+  <div class="bar"><i id="progress"></i></div>
+</div>
+
+<script>
+const steps = [
+  {pts:[[140,104]], on:'n-browser', cap:"Customer: “I'd like a refund for my Wireless Earbuds Pro on order LP-1001 — I changed my mind.”"},
+  {pts:[[140,104],[140,214]], on:'n-api', cap:"FastAPI middleware: assigns a request-id, checks the Idempotency-Key (a retry would replay, not re-run), and applies the per-IP rate limit."},
+  {pts:[[140,214],[140,316]], on:'n-guard', cap:"Input guardrail scans the message for prompt-injection / social-engineering patterns and records the result on the run (here: clean)."},
+  {pts:[[140,316],[480,252]], on:'n-agent', cap:"The LangGraph agent (gpt-4o) is invoked with the authenticated identity + the binding policy, and decides what to do first."},
+  {pts:[[480,252],[830,166]], on:'c-details', tool:'c-details', cap:"Tool call → get_order_details(LP-1001): Wireless Earbuds Pro, delivered 5 days ago, returnable, not final sale, $49.99."},
+  {pts:[[830,166],[480,252]], on:'n-agent', cap:"The result returns to the agent. Before acting, it verifies eligibility against the written policy."},
+  {pts:[[480,252],[830,228]], on:'c-elig', tool:'c-elig', cap:"Tool call → check_refund_eligibility(LP-1001) — an advisory call that routes into the deterministic policy engine."},
+  {pts:[[830,228],[830,384]], on:'n-policy', cap:"Policy engine evaluates in order: owned ✓ · not final-sale ✓ · returnable ✓ · within 30-day window ✓ · ≤ $500 ✓  →  eligible."},
+  {pts:[[830,384],[480,252]], on:'n-agent', cap:"The advisory result returns. The agent decides to issue the refund."},
+  {pts:[[480,252],[830,260]], on:'c-submit', tool:'c-submit', cap:"Tool call → submit_refund(LP-1001) — the system of record (the only path that writes a decision)."},
+  {pts:[[830,260],[830,384]], on:'n-policy', cap:"submit_refund RE-VALIDATES against the policy engine in code → APPROVE $49.99. Even a jailbroken model can't bypass this step."},
+  {pts:[[830,384],[480,500]], on:'n-db', cap:"The approved decision is written to refunds, and the full trace — every tool I/O, tokens, cost, latency, retries — to agent_runs."},
+  {pts:[[480,500],[140,500]], on:'n-response', cap:"The reply is composed and streamed back to the browser over Server-Sent Events, token by token."},
+  {pts:[[140,500],[22,500],[22,104],[140,104]], on:'n-browser', badge:true, cap:"The customer sees: “Your refund of $49.99 for the Wireless Earbuds Pro has been approved.”"},
+];
+
+const svg=document.getElementById('svg'), dot=document.getElementById('dot'), glow=document.getElementById('dotGlow');
+const stepLbl=document.getElementById('stepLbl'), capTxt=document.getElementById('capTxt'), prog=document.getElementById('progress');
+const playBtn=document.getElementById('play'), decision=document.getElementById('decision');
+let i=0, phase='dwell', tAcc=0, paused=false, durScale=1.1, used=new Set(), last=performance.now();
+const MOVE=720, DWELL=1700;
+
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+function posAlong(pts,t){
+  if(pts.length===1) return pts[0];
+  let segs=[],total=0;
+  for(let k=1;k<pts.length;k++){const L=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]);segs.push(L);total+=L;}
+  let d=t*total;
+  for(let k=1;k<pts.length;k++){
+    if(d<=segs[k-1]||k===pts.length-1){const f=segs[k-1]?Math.min(d/segs[k-1],1):1;
+      return [pts[k-1][0]+(pts[k][0]-pts[k-1][0])*f, pts[k-1][1]+(pts[k][1]-pts[k-1][1])*f];}
+    d-=segs[k-1];
+  }
+  return pts[pts.length-1];
+}
+function setActive(id){
+  document.querySelectorAll('.node.on,.chip.on').forEach(e=>e.classList.remove('on'));
+  const el=document.getElementById(id); if(el) el.classList.add('on');
+  used.forEach(t=>{const c=document.getElementById(t); if(c) c.classList.add('used');});
+}
+function enter(k){
+  const s=steps[k];
+  stepLbl.textContent=`STEP ${k+1} / ${steps.length}`;
+  capTxt.textContent=s.cap;
+  decision.style.opacity = s.badge ? 1 : 0;
+}
+function render(){
+  const s=steps[i], md=MOVE*durScale, dd=DWELL*durScale;
+  const t = phase==='move' ? easeInOut(Math.min(tAcc/md,1)) : 1;
+  const p=posAlong(s.pts,t);
+  dot.setAttribute('cx',p[0]); dot.setAttribute('cy',p[1]);
+  glow.setAttribute('cx',p[0]); glow.setAttribute('cy',p[1]);
+  setActive(s.on);
+  const frac=(i + (phase==='move'?Math.min(tAcc/md,1)*0.45:0.45 + Math.min(tAcc/dd,1)*0.55))/steps.length;
+  prog.style.width=(frac*100).toFixed(1)+'%';
+}
+function tick(now){
+  const dt=now-last; last=now;
+  if(!paused){
+    tAcc+=dt;
+    const md=MOVE*durScale, dd=DWELL*durScale;
+    if(phase==='move'){ if(tAcc>=md){phase='dwell'; tAcc-=md; if(steps[i].tool) used.add(steps[i].tool);} }
+    else { if(tAcc>=dd){ i=(i+1)%steps.length; phase='move'; tAcc=0; if(i===0) used.clear(); enter(i);} }
+  }
+  render();
+  requestAnimationFrame(tick);
+}
+function setPaused(p){ paused=p; playBtn.textContent = p ? '▶ Play' : '⏸ Pause'; }
+playBtn.onclick=()=>setPaused(!paused);
+svg.onclick=()=>setPaused(!paused);
+document.getElementById('restart').onclick=()=>{i=0;phase='move';tAcc=0;used.clear();enter(0);setPaused(false);};
+document.getElementById('speed').onchange=e=>{durScale=parseFloat(e.target.value);};
+
+enter(0);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

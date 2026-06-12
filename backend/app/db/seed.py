@@ -5,13 +5,14 @@ window-based scenarios remain valid whenever the database is rebuilt. Running th
 idempotent: by default it drops and recreates all tables for a clean, deterministic
 state ("works out of the box").
 """
+
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.core.config import DATA_DIR
-from app.db.database import engine, SessionLocal
+from app.db.database import SessionLocal, engine
 from app.db.models import Base, Customer, Order, OrderItem, Refund
 
 SEED_FILE = DATA_DIR / "crm_seed.json"
@@ -20,7 +21,7 @@ SEED_FILE = DATA_DIR / "crm_seed.json"
 def _days_ago(n: int | None) -> datetime | None:
     if n is None:
         return None
-    return datetime.now(timezone.utc) - timedelta(days=n)
+    return datetime.now(UTC) - timedelta(days=n)
 
 
 def seed(reset: bool = True) -> dict[str, int]:
@@ -100,5 +101,7 @@ def seed(reset: bool = True) -> dict[str, int]:
 if __name__ == "__main__":
     result = seed()
     print(f"Seeded database at {engine.url}")
-    print(f"  customers={result['customers']} orders={result['orders']} "
-          f"items={result['items']} pre_refunds={result['refunds']}")
+    print(
+        f"  customers={result['customers']} orders={result['orders']} "
+        f"items={result['items']} pre_refunds={result['refunds']}"
+    )
